@@ -1,0 +1,14 @@
+/**
+ * New query file
+ */
+
+ 
+ query gethistory {
+    description: "Select all history"
+    statement:
+   SELECT org.hyperledger.composer.system.HistorianRecord 
+   
+     WHERE (transactionType=='com.syntel.demo.retail.UpdateShipmentTracking')
+   
+ } 
+ 
