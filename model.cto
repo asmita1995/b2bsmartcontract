@@ -1,0 +1,152 @@
+/**
+ * New model file
+ */
+
+ /*
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/**
+ * Retail B2B Contract Management network
+ */
+namespace com.syntel.demo.retail
+
+enum OrderStatus {
+  o R  
+  o P  
+  o F  
+  o RE  
+  o S
+}
+enum ShipmentType {
+  o FR  
+  o FO  
+  o CL  
+  o MD  
+}
+enum SpecialCondition {
+  o RT  
+  o NDA 
+  o SH  
+}
+enum ShipmentStatus {
+  o PS 
+  o IT 
+  o DC 
+  o DV 
+  o NDV 
+  o PD 
+  o RE 
+  o S
+}
+asset Order  identified by orderId {
+    o String orderId //unique order id
+    o String orderDescription
+   // o OrderStatus orderStatus default="R"
+    o OrderStatus orderStatus default="S" optional
+    o DateTime orderDate
+    o String comments optional
+     --> OrderShipment[] orderShipments //one order can have multiple shipments
+    --> Retailer seller
+    --> LogisticProvider logisticProvider
+	o String[] rejectionReasons optional
+}
+
+
+
+
+
+
+asset OrderShipment identified by shipmentId {
+    o String shipmentId
+    o String shipmentDescription
+    o ShipmentType shipmentType
+    o ShipmentDetails shipmentDetails
+    o ShipmentTransportDetails shipmentTransportDetails
+    o ShipmentDeliveryDate shipmentDeliveryDate
+    o ShipmentTracking shipmentTracking
+}
+concept ShipmentDetails{
+    o Integer quantity
+    o Integer weight
+    o Integer volume
+    o SpecialCondition specialCondition
+}
+concept ShipmentTransportDetails{ 
+    o String sourceAddress
+    o Long sourcePinCode
+    o String destinationAddress
+    o Long destinationPinCode
+}
+concept ShipmentDeliveryDate{ 
+    o DateTime pickUpDate
+    o DateTime deliveryDate   
+}
+concept ShipmentTracking{ 
+    o ShipmentStatus shipmentStatus default="S" optional
+    o DateTime date optional
+    o String comments optional
+}
+
+abstract participant Company identified by companyId{
+    o String companyId
+    o String companyName    
+    o String companyAddress optional
+    o String contactNo optional
+    o String email optional
+}
+participant Retailer extends Company {         
+}
+participant LogisticProvider extends Company {   
+}
+//Retailer only place order transaction
+transaction SaveOrder {
+    o String orderId //unique order id
+    o String orderDescription  
+	o DateTime orderDate    	
+    o String comments optional
+    o OrderShipment[] orderShipments //one order can have multiple shipments    
+    --> LogisticProvider logisticProvider
+}
+
+transaction TransferOrder {
+ --> Order order
+ --> LogisticProvider logisticProvider
+}
+
+
+//Logistic provider only update shipment tracking transaction
+transaction UpdateShipmentTracking {
+    --> Order order
+    --> OrderShipment orderShipment
+    o ShipmentStatus shipmentStatus  
+	o DateTime date	
+    o String comments    
+}
+  transaction GetShipmentHistory {
+   o String shipmentId 
+  
+}
+event ShipmentNotification {
+  o String shipmentId optional
+  o DateTime date optional
+  o String sourceAddress
+   o String destinationAddress
+    o DateTime pickUpDate
+    o DateTime deliveryDate
+    o String shipmentStatus
+
+}
+ 
+
+
+

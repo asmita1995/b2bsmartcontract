@@ -1,0 +1,33 @@
+/**
+ * New query file
+ */
+/**
+ * New query file
+ */
+query getAllOrders{
+description:"Get all orders"
+statement:
+       SELECT com.syntel.demo.retail.Order   
+}
+
+query getAllOrderShipments{
+description:"Get all order shipments"
+statement:
+      SELECT com.syntel.demo.retail.OrderShipment	  
+}
+
+query getOrderDetailById{
+  description: "Get order details by order id"
+  statement:
+      SELECT com.syntel.demo.retail.Order
+      WHERE (_$OrderIdParam==orderId)
+}
+query gethistory {
+    description: "Select all history"
+    statement:
+   SELECT org.hyperledger.composer.system.HistorianRecord 
+   
+     WHERE (transactionType=='com.syntel.demo.retail.UpdateShipmentTracking')
+   
+} 
+ 

@@ -1,0 +1,132 @@
+/*
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/**
+ * B2B Contract management access control list.
+ */
+
+rule EveryRetailerCanReadEverything {
+    description: "Allow retailers read/create access to order asset"
+    participant: "com.syntel.demo.retail.Retailer"
+    operation: ALL
+    resource: "com.syntel.demo.retail.Order"
+    action: ALLOW
+}
+rule EverybodyCanSubmitTransactions1 {
+    description: "Allow retailers to submit place order transaction"
+    participant: "com.syntel.demo.retail.Retailer"
+    operation: ALL
+    resource: "com.syntel.demo.retail.TransferOrder"
+    action: ALLOW
+}
+rule SaveOrder1 {
+    description: "Allow retailers to submit place order transaction"
+    participant(m): "com.syntel.demo.retail.LogisticProvider"
+    operation: ALL
+    resource(v): "com.syntel.demo.retail.Order"
+  condition: (v.orderStatus == 'S')
+    action: DENY
+}
+rule SaveOrder2 {
+    description: "Allow retailers to submit place order transaction"
+    participant(m): "com.syntel.demo.retail.LogisticProvider"
+    operation: ALL
+    resource(v): "com.syntel.demo.retail.OrderShipment"
+  condition: (v.shipmentTracking.shipmentStatus == 'S')
+    action: DENY
+}
+
+
+
+rule EveryRetailerCanCreateEverything {
+    description: "Allow retailers read/create access to order shipment asset"
+    participant: "com.syntel.demo.retail.Retailer"
+    operation: ALL
+    resource: "com.syntel.demo.retail.OrderShipment"
+    action: ALLOW
+}
+
+rule EveryLogisticProviderCanUpdateEverything {
+    description: "Allow logistic providers read/update access order shipment asset"
+    participant: "com.syntel.demo.retail.LogisticProvider"
+    operation: READ,UPDATE
+    resource: "com.syntel.demo.retail.OrderShipment"
+    action: ALLOW
+}
+
+rule EveryLogisticProviderCanReadEverything {
+    description: "Allow logistic providers read/update access order asset"
+    participant: "com.syntel.demo.retail.LogisticProvider"
+    operation: READ,UPDATE
+    resource: "com.syntel.demo.retail.Order"
+    action: ALLOW
+}
+
+rule EverybodyCanSubmitTransactions {
+    description: "Allow retailers to submit place order transaction"
+    participant: "com.syntel.demo.retail.Retailer"
+    operation: ALL
+    resource: "com.syntel.demo.retail.SaveOrder"
+    action: ALLOW
+}
+
+
+rule historianAccess{
+  description: "Only allow members to read historian records referencing transactions they submitted."
+  participant(p): "com.syntel.demo.retail.LogisticProvider"
+  operation: READ
+  resource(r): "org.hyperledger.composer.system.HistorianRecord"
+  condition: (r.participantInvoking.getIdentifier() == p.getIdentifier())
+  action: ALLOW
+
+}
+rule historianAccess1{
+  description: "Only allow members to read historian records referencing transactions they submitted."
+  participant: "com.syntel.demo.retail.LogisticProvider"
+  operation: ALL
+  resource: "com.syntel.demo.retail.GetShipmentHistory"  
+  action: ALLOW
+}
+rule LPCanSubmitUpdateShipmentTrackingTransaction {
+    description: "Allow logistic providers to submit update shipment tracking transaction if the order status is not rejected"
+    participant(m): "com.syntel.demo.retail.LogisticProvider"
+    operation: CREATE
+    resource(v): "com.syntel.demo.retail.UpdateShipmentTracking"
+	condition: (v.order.orderStatus != 'RE')
+    action: ALLOW
+}
+
+rule SystemACL {
+  description:  "System ACL to permit all access"
+  participant: "org.hyperledger.composer.system.Participant"
+  operation: ALL
+  resource: "org.hyperledger.composer.system.**"
+  action: ALLOW
+}
+
+rule NetworkAdminUser {
+    description: "Grant business network administrators full access to user resources"
+    participant: "org.hyperledger.composer.system.NetworkAdmin"
+    operation: ALL
+    resource: "**"
+    action: ALLOW
+}
+
+rule NetworkAdminSystem {
+    description: "Grant business network administrators full access to system resources"
+    participant: "org.hyperledger.composer.system.NetworkAdmin"
+    operation: ALL
+    resource: "org.hyperledger.composer.system.**"
+    action: ALLOW
+}
